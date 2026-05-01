@@ -1,5 +1,6 @@
 package com.example.kserverproject.common.exception;
 
+import com.example.kserverproject.common.exception.enums.ErrorCode;
 import com.example.kserverproject.common.response.ErrorResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;

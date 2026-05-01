@@ -1,6 +1,6 @@
 package com.example.kserverproject.common.jwt;
 
-import com.example.kserverproject.common.exception.ErrorCode;
+import com.example.kserverproject.common.exception.enums.ErrorCode;
 import com.example.kserverproject.common.exception.UnauthorizedException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -36,12 +36,13 @@ public class JwtUtil {
 
     // 토큰 생성
     public String generateToken(Long userId, String email, String role) {
+        long now = System.currentTimeMillis();
         return Jwts.builder()
                 .subject(email)
                 .claim("userId", userId)
                 .claim("role", role)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + expiration))
+                .expiration(new Date(now + expiration))
                 .signWith(key)
                 .compact();
     }
@@ -65,7 +66,8 @@ public class JwtUtil {
 
     // userId 추출
     public Long getUserId(String token) {
-        return getClaims(token).get("userId", Long.class);
+        Object userId = getClaims(token).get("userId");
+        return userId instanceof Number ? ((Number) userId).longValue() : null;
     }
 
     // role 추출

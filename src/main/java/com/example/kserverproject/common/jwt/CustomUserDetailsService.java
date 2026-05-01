@@ -1,6 +1,6 @@
 package com.example.kserverproject.common.jwt;
 
-import com.example.kserverproject.common.exception.ErrorCode;
+import com.example.kserverproject.common.exception.enums.ErrorCode;
 import com.example.kserverproject.common.exception.UserException;
 import com.example.kserverproject.domain.user.entity.User;
 import com.example.kserverproject.domain.user.repository.UserRepository;

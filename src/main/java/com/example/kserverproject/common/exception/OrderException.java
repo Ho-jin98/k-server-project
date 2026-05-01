@@ -2,9 +2,9 @@ package com.example.kserverproject.common.exception;
 
 import com.example.kserverproject.common.exception.enums.ErrorCode;
 
-public class PointException extends BusinessException {
+public class OrderException extends BusinessException {
 
-    public PointException(ErrorCode errorCode) {
+    public OrderException(ErrorCode errorCode) {
         super(errorCode);
     }
 }

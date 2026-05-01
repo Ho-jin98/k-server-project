@@ -1,11 +1,12 @@
 package com.example.kserverproject.domain.user.entity;
 
 import com.example.kserverproject.common.entity.BaseEntity;
-import com.example.kserverproject.common.exception.ErrorCode;
+import com.example.kserverproject.common.exception.enums.ErrorCode;
 import com.example.kserverproject.common.exception.PointException;
 import com.example.kserverproject.domain.user.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -33,6 +34,15 @@ public class User extends BaseEntity {
 
     @Column(nullable = false)
     private Long pointBalance;
+
+    @Builder
+    public User(String email, String password, String nickname, UserRole role) {
+        this.email = email;
+        this.password = password;
+        this.nickname = nickname;
+        this.role = role;
+        this.pointBalance = 0L;
+    }
 
     // 포인트 충전
     public void chargePoint(Long amount) {
