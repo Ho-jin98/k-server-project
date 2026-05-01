@@ -38,3 +38,4 @@ out/
 
 ### 로컬 환경변수 ###
 application-local.yml
+application.yml
