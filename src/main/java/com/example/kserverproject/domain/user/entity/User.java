@@ -1,8 +1,8 @@
 package com.example.kserverproject.domain.user.entity;
 
 import com.example.kserverproject.common.entity.BaseEntity;
-import com.example.kserverproject.common.exception.enums.ErrorCode;
 import com.example.kserverproject.common.exception.PointException;
+import com.example.kserverproject.common.exception.enums.ErrorCode;
 import com.example.kserverproject.domain.user.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -46,6 +46,9 @@ public class User extends BaseEntity {
 
     // 포인트 충전
     public void chargePoint(Long amount) {
+        if (amount <= 0) {
+            throw new PointException(ErrorCode.INVALID_CHARGE_AMOUNT);
+        }
         this.pointBalance += amount;
     }
 
@@ -59,6 +62,9 @@ public class User extends BaseEntity {
 
     // 포인트 환불
     public void refundPoint(Long amount) {
+        if (amount <= 0) {
+            throw new PointException(ErrorCode.INVALID_REFUND_AMOUNT);
+        }
         this.pointBalance += amount;
     }
 

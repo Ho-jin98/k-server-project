@@ -14,6 +14,8 @@ public enum ErrorCode {
 
     // Point
     INSUFFICIENT_POINTS_BALANCE("POINT_001", "포인트 잔액이 부족합니다."),
+    INVALID_CHARGE_AMOUNT("POINT_002", "충전 금액은 0보다 커야합니다."),
+    INVALID_REFUND_AMOUNT("POINT_003", "환불 금액은 0보다 커야합니다."),
 
     // Token
     EXPIRED_TOKEN("AUTH_001", "유효하지 않은 토큰입니다."),
