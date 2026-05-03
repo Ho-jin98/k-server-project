@@ -1,7 +1,6 @@
-package com.example.kserverproject.common.response;
+package com.example.kserverproject.common.dto.response;
 
 import lombok.Builder;
-import org.springframework.http.HttpStatus;
 
 @Builder
 public record ApiResponse<T> (

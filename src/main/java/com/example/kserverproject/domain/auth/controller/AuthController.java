@@ -1,6 +1,6 @@
 package com.example.kserverproject.domain.auth.controller;
 
-import com.example.kserverproject.common.response.ApiResponse;
+import com.example.kserverproject.common.dto.response.ApiResponse;
 import com.example.kserverproject.domain.auth.dto.request.LoginRequestDto;
 import com.example.kserverproject.domain.auth.dto.request.SignupRequestDto;
 import com.example.kserverproject.domain.auth.dto.response.LoginResponseDto;

@@ -1,4 +1,4 @@
-package com.example.kserverproject.common.response;
+package com.example.kserverproject.common.dto.response;
 
 import lombok.Builder;
 

@@ -1,7 +1,7 @@
 package com.example.kserverproject.domain.user.controller;
 
 import com.example.kserverproject.common.jwt.CustomUserDetails;
-import com.example.kserverproject.common.response.ApiResponse;
+import com.example.kserverproject.common.dto.response.ApiResponse;
 import com.example.kserverproject.domain.user.dto.response.UserInformationResponseDto;
 import com.example.kserverproject.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
