@@ -30,16 +30,16 @@ public class OrderKafkaService {
     public void processOrderCompleted(OrderEventDto orderEventDto) {
 
         // Order 상태 CREATED -> COMPLETE로 변경
-        Order order = orderRepository.findById(orderEventDto.orderId())
+        Order findOrder = orderRepository.findById(orderEventDto.orderId())
                 .orElseThrow( () -> new OrderException(ErrorCode.ORDER_NOT_FOUND));
 
-        order.completeOrder();
+        findOrder.completeOrder();
 
         // 포인트 결제 기록
-        User user = userRepository.findById(orderEventDto.userId())
+        User findUser = userRepository.findById(orderEventDto.userId())
                 .orElseThrow( () -> new OrderException(ErrorCode.USER_NOT_FOUND));
 
-        pointHistoryService.record(user, orderEventDto.totalPrice(), PointType.PAYMENT);
+        pointHistoryService.record(findUser, orderEventDto.totalPrice(), PointType.PAYMENT);
     }
 
     // Redis는 트랜잭션 밖으로 분리

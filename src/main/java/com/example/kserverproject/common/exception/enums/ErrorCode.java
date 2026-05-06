@@ -24,6 +24,7 @@ public enum ErrorCode {
     // Order
     ORDER_NOT_FOUND("ORDER_001", "존재하지 않는 주문입니다."),
     INVALID_ORDER_STATUS("ORDER_002", "유효하지 않은 주문 상태입니다."),
+    ORDER_ACCESS_DENIED("ORDER_003", "해당 주문에 대한 권한이 없습니다."),
 
     // Admin
     UNAUTHORIZED_ADMIN_ACCESS("ADMIN_001", "접근 권한이 없습니다."),

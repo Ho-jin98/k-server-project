@@ -46,10 +46,9 @@ public class MenuService {
     // 메뉴 검색
     public PageResponseDto<MenuSearchResponseDto> searchMenus(MenuSearchRequestDto requestDto, Pageable pageable) {
 
-        Page<Menu> page = menuRepository.searchMenus(requestDto, pageable);
+        Page<MenuSearchResponseDto> result = menuRepository.searchMenus(requestDto, pageable)
+                .map(MenuSearchResponseDto::from);
 
-        Page<MenuSearchResponseDto> map = page.map(MenuSearchResponseDto::from);
-
-        return PageResponseDto.of(map);
+        return PageResponseDto.of(result);
     }
 }

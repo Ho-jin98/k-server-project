@@ -10,6 +10,7 @@ import com.example.kserverproject.domain.menu.dto.response.PopularMenuResponseDt
 import com.example.kserverproject.domain.menu.service.MenuPopularService;
 import com.example.kserverproject.domain.menu.service.MenuService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -42,8 +43,9 @@ public class MenuController {
     // 메뉴 검색
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<PageResponseDto<MenuSearchResponseDto>>> searchMenus(
-            @ModelAttribute MenuSearchRequestDto requestDto,
-            @PageableDefault Pageable pageable) {
+            @ModelAttribute MenuSearchRequestDto requestDto) {
+
+        Pageable pageable = PageRequest.of(requestDto.page() - 1, requestDto.size());
         return ResponseEntity.ok(ApiResponse.of(menuService.searchMenus(requestDto, pageable)));
     }
 
