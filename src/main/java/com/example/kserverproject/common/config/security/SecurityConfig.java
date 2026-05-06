@@ -6,6 +6,7 @@ import com.example.kserverproject.common.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -33,6 +34,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/menus/**").permitAll()
                         // 어드민 전용
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        // 고객 전용 (고객만 주문 생성 가능)
+                        .requestMatchers(HttpMethod.POST, "/api/orders").hasRole("CUSTOMER")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtFilter(jwtUtil, customUserDetailsService),
