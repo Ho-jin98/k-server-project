@@ -36,7 +36,7 @@ dependencies {
     runtimeOnly 'com.mysql:mysql-connector-j'
 
     // Messaging & Monitoring
-//    implementation 'org.springframework.kafka:spring-kafka'
+    implementation 'org.springframework.kafka:spring-kafka'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
     // Lombok (Main & Test)
@@ -50,6 +50,9 @@ dependencies {
     annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
     annotationProcessor "jakarta.annotation:jakarta.annotation-api"
     annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+
+    // dotenv 의존성
+    implementation 'io.github.cdimascio:dotenv-java:3.0.0'
 
     // 테스트 의존성
     // 1. JUnit5, AssertJ, Mockito, MockMvc, @DataJpaTest 등을 모두 포함

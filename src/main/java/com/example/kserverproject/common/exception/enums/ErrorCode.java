@@ -21,6 +21,10 @@ public enum ErrorCode {
     INVALID_MENU_PRICE("MENU_001", "메뉴 가격은 0보다 커야합니다."),
     MENU_NOT_FOUND("MENU_002", "존재하지 않는 메뉴입니다."),
 
+    // Order
+    ORDER_NOT_FOUND("ORDER_001", "존재하지 않는 주문입니다."),
+    INVALID_ORDER_STATUS("ORDER_002", "유효하지 않은 주문 상태입니다."),
+
     // Admin
     UNAUTHORIZED_ADMIN_ACCESS("ADMIN_001", "접근 권한이 없습니다."),
 
