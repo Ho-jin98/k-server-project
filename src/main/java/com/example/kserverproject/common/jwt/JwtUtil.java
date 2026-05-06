@@ -83,4 +83,10 @@ public class JwtUtil {
                 .parseSignedClaims(token)
                 .getPayload();
     }
+
+    // 토큰 남은 만료시간 (ms)
+    public long getRemainingTime(String token) {
+        Date expiration = getClaims(token).getExpiration();
+        return expiration.getTime() - System.currentTimeMillis();
+    }
 }

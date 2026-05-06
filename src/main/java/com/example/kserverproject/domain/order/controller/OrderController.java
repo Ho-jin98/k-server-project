@@ -64,6 +64,6 @@ public class OrderController {
             @PathVariable Long orderId) {
 
         Long userId = customUserDetails.getUser().getId();
-        return ResponseEntity.ok(ApiResponse.of(orderService.cancelMyOrder(userId, orderId)));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.of(orderService.cancelMyOrder(userId, orderId)));
     }
 }

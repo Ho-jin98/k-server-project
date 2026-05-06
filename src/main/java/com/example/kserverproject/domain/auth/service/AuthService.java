@@ -11,19 +11,23 @@ import com.example.kserverproject.domain.auth.dto.response.SignupResponseDto;
 import com.example.kserverproject.domain.user.entity.User;
 import com.example.kserverproject.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.concurrent.TimeUnit;
+
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final RedisTemplate<Object, Object> redisTemplate;
 
-    @Transactional
     public SignupResponseDto signup(SignupRequestDto requestDto) {
 
         boolean existsUser = userRepository.existsByEmail(requestDto.email());
@@ -45,7 +49,6 @@ public class AuthService {
 
     }
 
-    @Transactional
     public LoginResponseDto login(LoginRequestDto requestDto) {
 
         // 유저 검증
@@ -61,5 +64,20 @@ public class AuthService {
         String accessToken = jwtUtil.generateToken(user.getId(), user.getEmail(), user.getRole().name());
 
         return LoginResponseDto.of(user.getId(), accessToken);
+    }
+
+    public void logout(String token) {
+        // 토큰 유효성 검증
+        if (token == null || !jwtUtil.validateToken(token)) {
+            throw new UnauthorizedException(ErrorCode.INVALID_TOKEN);
+        }
+
+        long remainingTime = jwtUtil.getRemainingTime(token);
+
+        // 남은 만료시간이 있을 때만 블랙리스트에 저장
+        if (remainingTime > 0) {
+            redisTemplate.opsForValue()
+                    .set("blacklist:" + token, "logout", remainingTime, TimeUnit.MILLISECONDS);
+        }
     }
 }
