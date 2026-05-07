@@ -39,7 +39,7 @@ public class MenuPopularService {
 
         // ID 리스트 추출
         List<Long> menuIds = ranking.stream()
-                .map(tuple -> Long.valueOf(tuple.getValue()))
+                .map(tuple -> Long.valueOf(Objects.requireNonNull(tuple.getValue())))
                 .toList();
 
         // DB에서 메뉴 정보 한번에 조회 (IN 쿼리)
@@ -51,7 +51,7 @@ public class MenuPopularService {
         int currentRank = 1;
 
         for (TypedTuple<String> tuple : ranking) {
-            Long id = Long.valueOf(tuple.getValue());
+            Long id = Long.valueOf(Objects.requireNonNull(tuple.getValue()));
             Menu menu = menuMap.get(id);
 
             if (menu != null) {

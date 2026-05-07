@@ -63,14 +63,27 @@ public class MenuRedisService {
         // 오늘부터 과거 7일치 키 리스트 생성
         List<String> keys = IntStream.range(0, TOTAL_DAYS)
                 .mapToObj(i -> DAILY_KEY_PREFIX + LocalDate.now().minusDays(i).toString())
+                .filter(key -> Boolean.TRUE.equals(stringRedisTemplate.hasKey(key)))
                 .toList();
 
-        if (!keys.isEmpty()) {
-            // 여러 날짜의 키를 합쳐서 RESULT_KEY에 저장
-            stringRedisTemplate.opsForZSet().unionAndStore(keys.get(0), keys.subList(1, keys.size()), RESULT_KEY);
-
-            // 결과는 설정된 시간(1시간) 동안 캐싱
-            stringRedisTemplate.expire(RESULT_KEY, cacheHours, TimeUnit.HOURS);
+        if (keys.isEmpty()) {
+            return;
         }
+
+        if (keys.size() == 1) {
+            Set<TypedTuple<String>> single = stringRedisTemplate.opsForZSet()
+                    .rangeWithScores(keys.get(0), 0, -1);
+
+            if (single != null && !single.isEmpty()) {
+                stringRedisTemplate.opsForZSet().add(RESULT_KEY, single);
+                stringRedisTemplate.expire(RESULT_KEY, cacheHours, TimeUnit.HOURS);
+            }
+            return;
+        }
+        // 여러 날짜의 키를 합쳐서 RESULT_KEY에 저장
+        stringRedisTemplate.opsForZSet().unionAndStore(keys.get(0), keys.subList(1, keys.size()), RESULT_KEY);
+
+        // 결과는 설정된 시간(1시간) 동안 캐싱
+        stringRedisTemplate.expire(RESULT_KEY, cacheHours, TimeUnit.HOURS);
     }
 }
