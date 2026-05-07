@@ -11,7 +11,11 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
-@Table(name = "order_items")
+@Table(name = "order_items",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_order_name",
+                        columnNames = {"order_id", "menu_id"})
+        })
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class OrderItem extends BaseEntity {
     @Id

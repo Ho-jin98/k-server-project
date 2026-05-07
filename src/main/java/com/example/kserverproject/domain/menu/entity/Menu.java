@@ -13,10 +13,7 @@ import org.hibernate.annotations.SQLRestriction;
 
 @Getter
 @Entity
-@Table(name = "menu",
-        uniqueConstraints = {
-                @UniqueConstraint(name = "uk_menu_name", columnNames = "menu_name")
-        })
+@Table(name = "menus")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @SQLDelete(sql = "UPDATE menus SET is_deleted = true WHERE id = ?")
 @SQLRestriction("is_deleted = false")

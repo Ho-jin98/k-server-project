@@ -15,25 +15,39 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class OrderItemFactory {
 
-    // OrderItem 리스트 생성 + 총금액 계산
+    // OrderItem 리스트 생성 + 중복 menuId는 quantity 합산
     public List<OrderItem> createOrderItems(
             List<CreateOrderRequestDto.OrderItemRequestDto> menuItems,
             List<Menu> menus) {
 
+        // 메뉴 조회용 Map 생성
         Map<Long, Menu> menuMap = new HashMap<>();
         for (Menu menu : menus) {
             menuMap.put(menu.getId(), menu);
         }
 
+        // 중복 menuId 처리 -> 총 수량 합산
+        Map<Long, Integer> menuQuantity = new HashMap<>();
+        for (CreateOrderRequestDto.OrderItemRequestDto itemDto : menuItems) {
+            menuQuantity.merge(
+                    itemDto.menuId(),       // key = menuId
+                    itemDto.quantity(),     // value = quantity
+                    Integer::sum            // 중복 시 수량 합산
+            );
+        }
+
         // OrderItem 리스트 생성
         List<OrderItem> orderItems = new ArrayList<>();
 
-        for (CreateOrderRequestDto.OrderItemRequestDto itemDto : menuItems) {
-            Menu menu = menuMap.get(itemDto.menuId());
+        for (Map.Entry<Long, Integer> entry : menuQuantity.entrySet()) {
+            Long menuId = entry.getKey();
+            Integer totalQuantity = entry.getValue();
+
+            Menu menu = menuMap.get(menuId);
 
             OrderItem orderItem = OrderItem.builder()
                     .menu(menu)
-                    .quantity(itemDto.quantity())
+                    .quantity(totalQuantity) // 합산 된 수량
                     .price(menu.getPrice())
                     .build();
             orderItems.add(orderItem);
