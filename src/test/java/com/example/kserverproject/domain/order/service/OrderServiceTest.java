@@ -8,6 +8,7 @@ import com.example.kserverproject.common.exception.PointException;
 import com.example.kserverproject.common.exception.UserException;
 import com.example.kserverproject.common.fixture.TestFixtures;
 import com.example.kserverproject.domain.menu.repository.MenuRepository;
+import com.example.kserverproject.domain.order.dto.event.OrderCreatedEvent;
 import com.example.kserverproject.domain.order.dto.request.CreateOrderRequestDto;
 import com.example.kserverproject.domain.order.dto.response.CreateOrderResponseDto;
 import com.example.kserverproject.domain.order.dto.response.OrderCancelResponseDto;
@@ -29,6 +30,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -65,13 +67,13 @@ class OrderServiceTest {
     private PointHistoryService pointHistoryService;
 
     @Mock
-    private OrderProducer orderProducer;
-
-    @Mock
     private RedisLockService redisLockService;
 
     @Mock
     private OrderItemFactory orderItemFactory;
+
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
 
     // RedisLockService의 executeWithLock이 실제 supplier를 실행하도록 설정
     @SuppressWarnings("unchecked")
@@ -114,7 +116,7 @@ class OrderServiceTest {
             assertThat(response.orderStatus()).isEqualTo(OrderStatus.CREATED);
             assertThat(response.totalAmount()).isEqualTo(6000L);
             assertThat(customer.getPointBalance()).isEqualTo(994_000L); // 1_000_000 - 6_000
-            verify(orderProducer).send(any());
+            verify(eventPublisher).publishEvent(any(OrderCreatedEvent.class));
         }
 
         @Test

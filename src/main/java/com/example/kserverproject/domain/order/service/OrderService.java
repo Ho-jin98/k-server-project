@@ -8,7 +8,7 @@ import com.example.kserverproject.common.exception.UserException;
 import com.example.kserverproject.common.exception.enums.ErrorCode;
 import com.example.kserverproject.domain.menu.entity.Menu;
 import com.example.kserverproject.domain.menu.repository.MenuRepository;
-import com.example.kserverproject.domain.order.dto.event.OrderEventDto;
+import com.example.kserverproject.domain.order.dto.event.OrderCreatedEvent;
 import com.example.kserverproject.domain.order.dto.request.CreateOrderRequestDto;
 import com.example.kserverproject.domain.order.dto.response.CreateOrderResponseDto;
 import com.example.kserverproject.domain.order.dto.response.OrderCancelResponseDto;
@@ -25,6 +25,7 @@ import com.example.kserverproject.domain.pointHistory.service.PointHistoryServic
 import com.example.kserverproject.domain.user.entity.User;
 import com.example.kserverproject.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -42,9 +43,9 @@ public class OrderService {
     private final UserRepository userRepository;
     private final MenuRepository menuRepository;
     private final PointHistoryService pointHistoryService;
-    private final OrderProducer orderProducer;
     private final RedisLockService redisLockService;
     private final OrderItemFactory orderItemFactory;
+    private final ApplicationEventPublisher eventPublisher;
 
     // 주문 생성
     @Transactional
@@ -87,7 +88,7 @@ public class OrderService {
             Order savedOrder = orderRepository.save(order);
 
             // Kafka 이벤트 발생
-            orderProducer.send(OrderEventDto.from(savedOrder));
+            eventPublisher.publishEvent(OrderCreatedEvent.from(savedOrder));
 
             return CreateOrderResponseDto.from(savedOrder);
         });

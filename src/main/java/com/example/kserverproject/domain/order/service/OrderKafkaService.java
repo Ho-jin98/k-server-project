@@ -5,6 +5,7 @@ import com.example.kserverproject.common.exception.enums.ErrorCode;
 import com.example.kserverproject.domain.menu.service.MenuRedisService;
 import com.example.kserverproject.domain.order.dto.event.OrderEventDto;
 import com.example.kserverproject.domain.order.entity.Order;
+import com.example.kserverproject.domain.order.enums.OrderStatus;
 import com.example.kserverproject.domain.order.repository.OrderRepository;
 import com.example.kserverproject.domain.pointHistory.enums.PointType;
 import com.example.kserverproject.domain.pointHistory.service.PointHistoryService;
@@ -32,6 +33,12 @@ public class OrderKafkaService {
         // Order 상태 CREATED -> COMPLETE로 변경
         Order findOrder = orderRepository.findById(orderEventDto.orderId())
                 .orElseThrow( () -> new OrderException(ErrorCode.ORDER_NOT_FOUND));
+
+        // 이미 처리된 주문이면 스킵
+        if (findOrder.getOrderStatus() == OrderStatus.COMPLETED) {
+            log.info("이미 처리된 주문 - orderId: {}", orderEventDto.orderId());
+            return;
+        }
 
         findOrder.completeOrder();
 
