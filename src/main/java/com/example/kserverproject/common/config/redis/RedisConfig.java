@@ -1,5 +1,8 @@
 package com.example.kserverproject.common.config.redis;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
@@ -28,6 +31,14 @@ public class RedisConfig {
     @Value("${spring.data.redis.port}")
     private int redisPort;
 
+    private GenericJackson2JsonRedisSerializer jsonSerializer() {
+        ObjectMapper objectMapper = new ObjectMapper()
+                .registerModule(new JavaTimeModule())
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+        return new GenericJackson2JsonRedisSerializer(objectMapper);
+    }
+
     // Redisson 클라이언트
     @Bean
     public RedissonClient redissonClient() {
@@ -44,10 +55,12 @@ public class RedisConfig {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
 
         template.setConnectionFactory(redisConnectionFactory);
+
+        GenericJackson2JsonRedisSerializer serializer = jsonSerializer();
         template.setKeySerializer(new StringRedisSerializer());
-        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+        template.setValueSerializer(serializer);
         template.setHashKeySerializer(new StringRedisSerializer());
-        template.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
+        template.setHashValueSerializer(serializer);
 
         return template;
     }
@@ -63,7 +76,7 @@ public class RedisConfig {
                 )
                 .serializeValuesWith(
                         RedisSerializationContext.SerializationPair
-                                .fromSerializer(new GenericJackson2JsonRedisSerializer())
+                                .fromSerializer(jsonSerializer())
                 )
                 .disableCachingNullValues();
 

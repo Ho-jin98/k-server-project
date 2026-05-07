@@ -32,7 +32,7 @@ public class OrderController {
             @Valid @RequestBody CreateOrderRequestDto requestDto) {
 
         Long userId = customUserDetails.getUser().getId();
-        return ResponseEntity.ok(ApiResponse.of(orderService.createOrder(userId, requestDto)));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.of(orderService.createOrder(userId, requestDto)));
     }
 
     // 내 주문 상세 조회
@@ -64,6 +64,6 @@ public class OrderController {
             @PathVariable Long orderId) {
 
         Long userId = customUserDetails.getUser().getId();
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.of(orderService.cancelMyOrder(userId, orderId)));
+        return ResponseEntity.ok(ApiResponse.of(orderService.cancelMyOrder(userId, orderId)));
     }
 }

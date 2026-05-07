@@ -32,7 +32,7 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/signup", "/api/auth/logi" ).permitAll()
+                        .requestMatchers("/api/auth/signup", "/api/auth/login" ).permitAll()
                         .requestMatchers("/api/menus/**").permitAll()
                         // 어드민 전용
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
