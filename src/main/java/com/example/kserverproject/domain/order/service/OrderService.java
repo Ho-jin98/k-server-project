@@ -84,12 +84,12 @@ public class OrderService {
                 order.addOrderItem(orderItem);
             }
 
-            orderRepository.save(order);
+            Order savedOrder = orderRepository.save(order);
 
             // Kafka 이벤트 발생
-            orderProducer.send(OrderEventDto.from(order));
+            orderProducer.send(OrderEventDto.from(savedOrder));
 
-            return CreateOrderResponseDto.from(order);
+            return CreateOrderResponseDto.from(savedOrder);
         });
 
     }

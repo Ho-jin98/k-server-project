@@ -66,6 +66,8 @@ dependencies {
 
     // JUnit Platform Launcher (Gradle 8.x 이상에서 테스트 실행을 위해 권장)
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    testRuntimeOnly 'com.h2database:h2'
 }
 
 tasks.named('test') {
