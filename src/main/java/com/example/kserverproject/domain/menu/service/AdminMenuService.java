@@ -35,9 +35,14 @@ public class AdminMenuService {
             throw new UnauthorizedException(ErrorCode.UNAUTHORIZED_ADMIN_ACCESS);
         }
 
+        if(menuRepository.existsByMenuName(requestDto.menuName())) {
+            throw new MenuException(ErrorCode.DUPLICATE_MENU_NAME);
+        }
+
         Menu createMenu = Menu.builder()
                 .menuName(requestDto.menuName())
                 .price(requestDto.price())
+                .imageUrl(requestDto.imageUrl())
                 .build();
 
         menuRepository.save(createMenu);
@@ -59,7 +64,12 @@ public class AdminMenuService {
         Menu findMenu = menuRepository.findById(menuId)
                 .orElseThrow(() -> new MenuException(ErrorCode.MENU_NOT_FOUND));
 
-        findMenu.updateMenu(requestDto.menuName(), requestDto.price());
+        if (!findMenu.getMenuName().equals(requestDto.menuName())
+                && menuRepository.existsByMenuNameAndIdNot(requestDto.menuName(), menuId)) {
+            throw new MenuException(ErrorCode.DUPLICATE_MENU_NAME);
+        }
+
+        findMenu.updateMenu(requestDto.menuName(), requestDto.price(), requestDto.imageUrl());
 
         return UpdateMenuResponseDto.from(findMenu);
     }

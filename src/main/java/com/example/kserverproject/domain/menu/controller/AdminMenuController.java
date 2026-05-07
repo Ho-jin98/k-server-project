@@ -32,7 +32,7 @@ public class AdminMenuController {
     }
 
     // 메뉴 수정
-    @PutMapping("/{menuId}")
+    @PatchMapping("/{menuId}")
     public ResponseEntity<ApiResponse<UpdateMenuResponseDto>> updateMenu(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @Valid @RequestBody UpdateMenuRequestDto requestDto,

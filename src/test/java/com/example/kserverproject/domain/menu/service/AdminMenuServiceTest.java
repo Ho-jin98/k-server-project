@@ -120,6 +120,20 @@ class AdminMenuServiceTest {
             assertThatThrownBy(() -> adminMenuService.updateMenu(1L, request, 999L))
                     .isInstanceOf(MenuException.class);
         }
+
+        @Test
+        @DisplayName("이미 존재하는 메뉴 이름으로 생성 시 MenuException이 발생한다")
+        void createMenu_duplicateName_throwsMenuException() {
+            CreateMenuRequestDto request = new CreateMenuRequestDto(
+                    "아메리카노", 3000L, "https://example.com/images/americano.jpg"
+            );
+
+            given(userRepository.findById(1L)).willReturn(Optional.of(TestFixtures.createAdmin()));
+            given(menuRepository.existsByMenuName("아메리카노")).willReturn(true);
+
+            assertThatThrownBy(() -> adminMenuService.createMenu(1L, request))
+                    .isInstanceOf(MenuException.class);
+        }
     }
 
     @Nested

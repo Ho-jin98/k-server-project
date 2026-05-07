@@ -20,6 +20,7 @@ public enum ErrorCode {
     // Menu
     INVALID_MENU_PRICE("MENU_001", "메뉴 가격은 0보다 커야합니다."),
     MENU_NOT_FOUND("MENU_002", "존재하지 않는 메뉴입니다."),
+    DUPLICATE_MENU_NAME("MENU_003", "이미 존재하는 메뉴 이름입니다."),
 
     // Order
     ORDER_NOT_FOUND("ORDER_001", "존재하지 않는 주문입니다."),

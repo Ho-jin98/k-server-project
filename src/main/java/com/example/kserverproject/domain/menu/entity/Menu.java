@@ -13,7 +13,10 @@ import org.hibernate.annotations.SQLRestriction;
 
 @Getter
 @Entity
-@Table(name = "menus")
+@Table(name = "menu",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_menu_name", columnNames = "menu_name")
+        })
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @SQLDelete(sql = "UPDATE menus SET is_deleted = true WHERE id = ?")
 @SQLRestriction("is_deleted = false")
@@ -43,11 +46,18 @@ public class Menu extends BaseEntity {
         this.isDeleted = false;
     }
 
-    public void updateMenu(String menuName, Long price) {
-        this.menuName = menuName;
-        if (price == null || price <= 0) {
-            throw new MenuException(ErrorCode.INVALID_MENU_PRICE);
+    public void updateMenu(String menuName, Long price, String imageUrl) {
+        if (menuName != null && !menuName.isBlank()) {
+            this.menuName = menuName;
         }
-        this.price = price;
+        if (price != null) {
+            if (price <= 0) {
+                throw new MenuException(ErrorCode.INVALID_MENU_PRICE);
+            }
+            this.price = price;
+        }
+        if (imageUrl != null && !imageUrl.isBlank()) {
+            this.imageUrl = imageUrl;
+        }
     }
 }
