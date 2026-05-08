@@ -46,7 +46,7 @@ public class PointHistoryController {
     @GetMapping("/histories")
     public ResponseEntity<ApiResponse<PageResponseDto<PointHistoryTransactionalResponseDto>>> getMyPointTransactionalRecord(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
-            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
 
         Pageable pageable = PageRequest.of(page -1, size);
