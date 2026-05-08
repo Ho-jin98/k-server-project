@@ -17,7 +17,6 @@ import com.example.kserverproject.domain.order.dto.response.OrderListResponseDto
 import com.example.kserverproject.domain.order.entity.Order;
 import com.example.kserverproject.domain.order.entity.OrderItem;
 import com.example.kserverproject.domain.order.enums.OrderStatus;
-import com.example.kserverproject.domain.order.producer.OrderProducer;
 import com.example.kserverproject.domain.order.repository.OrderRepository;
 import com.example.kserverproject.domain.order.util.OrderItemFactory;
 import com.example.kserverproject.domain.pointHistory.enums.PointType;
@@ -25,7 +24,9 @@ import com.example.kserverproject.domain.pointHistory.service.PointHistoryServic
 import com.example.kserverproject.domain.user.entity.User;
 import com.example.kserverproject.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -47,52 +48,71 @@ public class OrderService {
     private final OrderItemFactory orderItemFactory;
     private final ApplicationEventPublisher eventPublisher;
 
-    // 주문 생성
-    @Transactional
+    private OrderService self;
+
+    /**
+     * Spring 프록시를 통해 내부 트랜잭션을 호출하기 위한 자기 참조 주입
+     */
+    @Lazy
+    @Autowired
+    public void setSelf(OrderService self) {
+        this.self = self;
+    }
+
+    // 락 획득 후 내부 트랜잭션 메서드(createOrderInternal)를 호출
     public CreateOrderResponseDto createOrder(Long userId, CreateOrderRequestDto requestDto) {
+        return redisLockService.executeWithLock("lock:order:" + userId, () ->
+                self.createOrderInternal(userId, requestDto)
+        );
+    }
 
-        return redisLockService.executeWithLock("lock:order:" + userId, () -> {
+    /**
+     * 실제 주문 처리 - 내부 트랜잭션 메서드
+     */
+    @Transactional
+    public CreateOrderResponseDto createOrderInternal(Long userId, CreateOrderRequestDto requestDto) {
 
-            // 유저 조회
-            User user = userRepository.findByUserIdWithLock(userId)
-                    .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
+        // 유저 조회
+        User user = userRepository.findByUserIdWithLock(userId)
+                .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
 
-            // 메뉴 리스트 조회
-            List<Menu> menus = new ArrayList<>();
-            for (CreateOrderRequestDto.OrderItemRequestDto itemDto : requestDto.menuItems()) {
-                Menu menu = menuRepository.findById(itemDto.menuId())
-                        .orElseThrow( () -> new MenuException(ErrorCode.MENU_NOT_FOUND));
-                menus.add(menu);
-            }
+        // 메뉴 리스트 조회
+        List<Menu> menus = new ArrayList<>();
+        for (CreateOrderRequestDto.OrderItemRequestDto itemDto : requestDto.menuItems()) {
+            Menu menu = menuRepository.findById(itemDto.menuId())
+                    .orElseThrow(() -> new MenuException(ErrorCode.MENU_NOT_FOUND));
+            menus.add(menu);
+        }
 
-            // OrderItem 생성과 총 금액 계산을 orderItemFactory에게 넘기기
-            List<OrderItem> orderItemList = orderItemFactory.createOrderItems(requestDto.menuItems(), menus);
-            long totalAmount = orderItemFactory.calculateTotalAmount(orderItemList);
+        // OrderItem 생성과 총 금액 계산을 orderItemFactory에게 넘기기
+        List<OrderItem> orderItemList = orderItemFactory.createOrderItems(requestDto.menuItems(), menus);
+        long totalAmount = orderItemFactory.calculateTotalAmount(orderItemList);
 
-            // 포인트 잔액 확인 + 차감
-            user.deductPoint(totalAmount);
+        // 포인트 잔액 확인 + 차감
+        user.deductPoint(totalAmount);
 
-            // 주문 생성
-            Order order = Order.builder()
-                    .user(user)
-                    .totalAmount(totalAmount)
-                    .orderStatus(OrderStatus.CREATED)
-                    .build();
+        // 포인트 내역 기록 (결제) - 트랜잭션 내에서 즉시 기록하여 정합성 보장
+        pointHistoryService.record(user, totalAmount, PointType.PAYMENT);
 
-            // OrderItem 중간 테이블에 Order 연결
-            for (OrderItem orderItem : orderItemList) {
-                orderItem.connectOrder(order);
-                order.addOrderItem(orderItem);
-            }
+        // 주문 생성
+        Order order = Order.builder()
+                .user(user)
+                .totalAmount(totalAmount)
+                .orderStatus(OrderStatus.CREATED)
+                .build();
 
-            Order savedOrder = orderRepository.save(order);
+        // OrderItem 중간 테이블에 Order 연결
+        for (OrderItem orderItem : orderItemList) {
+            orderItem.connectOrder(order);
+            order.addOrderItem(orderItem);
+        }
 
-            // Kafka 이벤트 발생
-            eventPublisher.publishEvent(OrderCreatedEvent.from(savedOrder));
+        Order savedOrder = orderRepository.save(order);
 
-            return CreateOrderResponseDto.from(savedOrder);
-        });
+        // Kafka 이벤트 발생
+        eventPublisher.publishEvent(OrderCreatedEvent.from(savedOrder));
 
+        return CreateOrderResponseDto.from(savedOrder);
     }
 
     // 주문 상세 조회

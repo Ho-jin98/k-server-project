@@ -110,15 +110,15 @@ class MenuControllerTest {
         }
 
         @Test
-        @DisplayName("존재하지 않는 메뉴 조회 시 400을 반환한다")
-        void getMenu_notFound_returns400() throws Exception {
+        @DisplayName("존재하지 않는 메뉴 조회 시 404를 반환한다")
+        void getMenu_notFound_returns404() throws Exception {
             given(menuService.getMenu(999L))
                     .willThrow(new MenuException(ErrorCode.MENU_NOT_FOUND));
 
             mockMvc.perform(get("/api/menus/999"))
                     .andDo(print())
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.error.code").value("MENU_002"));
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.error.code").value("MENU_NOT_FOUND"));
         }
     }
 
@@ -171,7 +171,7 @@ class MenuControllerTest {
                     1, 10, 1L
             );
 
-            given(menuService.searchMenus(any(), any())).willReturn(response);
+            given(menuService.searchMenus(any(), any(), any())).willReturn(response);
 
             mockMvc.perform(get("/api/menus/search")
                             .param("keyword", "아메리카노")
@@ -191,7 +191,7 @@ class MenuControllerTest {
                     List.of(), 1, 10, 0L
             );
 
-            given(menuService.searchMenus(any(), any())).willReturn(response);
+            given(menuService.searchMenus(any(), any(), any())).willReturn(response);
 
             mockMvc.perform(get("/api/menus/search")
                             .param("keyword", "없는메뉴")

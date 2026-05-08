@@ -37,6 +37,9 @@ class MenuServiceTest {
     @Mock
     private MenuRepository menuRepository;
 
+    @Mock
+    private MenuRedisService menuRedisService;
+
     @Nested
     @DisplayName("메뉴 목록 조회")
     class GetMenus {
@@ -44,6 +47,7 @@ class MenuServiceTest {
         @Test
         @DisplayName("전체 메뉴 목록을 반환한다")
         void getMenus_success() {
+            given(menuRedisService.getMenusCache()).willReturn(null);
             given(menuRepository.findAll()).willReturn(List.of(
                     TestFixtures.createAmericano(),
                     TestFixtures.createLatte(),
@@ -60,6 +64,7 @@ class MenuServiceTest {
         @Test
         @DisplayName("메뉴가 없으면 빈 리스트를 반환한다")
         void getMenus_empty() {
+            given(menuRedisService.getMenusCache()).willReturn(null);
             given(menuRepository.findAll()).willReturn(List.of());
 
             List<MenuListResponseDto> result = menuService.getMenus();
@@ -75,17 +80,19 @@ class MenuServiceTest {
         @Test
         @DisplayName("존재하는 메뉴 ID로 상세 정보를 조회한다")
         void getMenu_success() {
+            given(menuRedisService.getMenuCache(1L)).willReturn(null);
             given(menuRepository.findById(1L)).willReturn(Optional.of(TestFixtures.createAmericano()));
 
             MenuDetailResponseDto result = menuService.getMenu(1L);
 
-            assertThat(result.menuName()).isEqualTo("아메리카노");
-            assertThat(result.price()).isEqualTo(3000L);
+            assertThat(result.getMenuName()).isEqualTo("아메리카노");
+            assertThat(result.getPrice()).isEqualTo(3000L);
         }
 
         @Test
         @DisplayName("존재하지 않는 메뉴 ID 조회 시 MenuException이 발생한다")
         void getMenu_notFound_throwsMenuException() {
+            given(menuRedisService.getMenuCache(999L)).willReturn(null);
             given(menuRepository.findById(999L)).willReturn(Optional.empty());
 
             assertThatThrownBy(() -> menuService.getMenu(999L))
@@ -106,7 +113,7 @@ class MenuServiceTest {
 
             given(menuRepository.searchMenus(requestDto, pageable)).willReturn(page);
 
-            PageResponseDto<MenuSearchResponseDto> result = menuService.searchMenus(requestDto, pageable);
+            PageResponseDto<MenuSearchResponseDto> result = menuService.searchMenus(requestDto, pageable, null);
 
             assertThat(result.content()).hasSize(1);
             assertThat(result.content().get(0).menuName()).isEqualTo("아메리카노");
@@ -124,7 +131,7 @@ class MenuServiceTest {
 
             given(menuRepository.searchMenus(requestDto, pageable)).willReturn(page);
 
-            PageResponseDto<MenuSearchResponseDto> result = menuService.searchMenus(requestDto, pageable);
+            PageResponseDto<MenuSearchResponseDto> result = menuService.searchMenus(requestDto, pageable, null);
 
             assertThat(result.content()).hasSize(2);
             assertThat(result.totalElements()).isEqualTo(2L);
@@ -139,7 +146,7 @@ class MenuServiceTest {
 
             given(menuRepository.searchMenus(requestDto, pageable)).willReturn(emptyPage);
 
-            PageResponseDto<MenuSearchResponseDto> result = menuService.searchMenus(requestDto, pageable);
+            PageResponseDto<MenuSearchResponseDto> result = menuService.searchMenus(requestDto, pageable, null);
 
             assertThat(result.content()).isEmpty();
             assertThat(result.totalElements()).isEqualTo(0L);

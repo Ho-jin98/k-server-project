@@ -67,7 +67,7 @@ class OrderControllerTest {
     class CreateOrder {
 
         @Test
-        @DisplayName("정상 주문 생성 시 200을 반환한다")
+        @DisplayName("정상 주문 생성 시 201을 반환한다")
         void createOrder_success() throws Exception {
             CreateOrderRequestDto request = new CreateOrderRequestDto(
                     List.of(new CreateOrderRequestDto.OrderItemRequestDto(1L, 2))
@@ -88,7 +88,7 @@ class OrderControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andDo(print())
-                    .andExpect(status().isOk())
+                    .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.success").value(true))
                     .andExpect(jsonPath("$.data.orderId").value(1))
                     .andExpect(jsonPath("$.data.totalAmount").value(6000))
@@ -111,8 +111,8 @@ class OrderControllerTest {
         }
 
         @Test
-        @DisplayName("포인트 잔액 부족 시 400을 반환한다")
-        void createOrder_insufficientPoints_returns400() throws Exception {
+        @DisplayName("포인트 잔액 부족 시 409를 반환한다")
+        void createOrder_insufficientPoints_returns409() throws Exception {
             CreateOrderRequestDto request = new CreateOrderRequestDto(
                     List.of(new CreateOrderRequestDto.OrderItemRequestDto(1L, 1))
             );
@@ -127,13 +127,13 @@ class OrderControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andDo(print())
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.error.code").value("POINT_001"));
+                    .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.error.code").value("INSUFFICIENT_POINTS_BALANCE"));
         }
 
         @Test
-        @DisplayName("존재하지 않는 메뉴 주문 시 400을 반환한다")
-        void createOrder_menuNotFound_returns400() throws Exception {
+        @DisplayName("존재하지 않는 메뉴 주문 시 404를 반환한다")
+        void createOrder_menuNotFound_returns404() throws Exception {
             CreateOrderRequestDto request = new CreateOrderRequestDto(
                     List.of(new CreateOrderRequestDto.OrderItemRequestDto(999L, 1))
             );
@@ -148,8 +148,8 @@ class OrderControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andDo(print())
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.error.code").value("MENU_002"));
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.error.code").value("MENU_NOT_FOUND"));
         }
     }
 
@@ -182,8 +182,8 @@ class OrderControllerTest {
         }
 
         @Test
-        @DisplayName("존재하지 않는 주문 조회 시 400을 반환한다")
-        void getOrderDetail_notFound_returns400() throws Exception {
+        @DisplayName("존재하지 않는 주문 조회 시 404를 반환한다")
+        void getOrderDetail_notFound_returns404() throws Exception {
             given(orderService.getOrderDetail(2L, 999L))
                     .willThrow(new OrderException(ErrorCode.ORDER_NOT_FOUND));
 
@@ -192,13 +192,13 @@ class OrderControllerTest {
             mockMvc.perform(get("/api/orders/999")
                             .with(user(userDetails)))
                     .andDo(print())
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.error.code").value("ORDER_001"));
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.error.code").value("ORDER_NOT_FOUND"));
         }
 
         @Test
-        @DisplayName("타인의 주문 조회 시 400을 반환한다")
-        void getOrderDetail_accessDenied_returns400() throws Exception {
+        @DisplayName("타인의 주문 조회 시 403을 반환한다")
+        void getOrderDetail_accessDenied_returns403() throws Exception {
             given(orderService.getOrderDetail(2L, 1L))
                     .willThrow(new OrderException(ErrorCode.ORDER_ACCESS_DENIED));
 
@@ -207,8 +207,8 @@ class OrderControllerTest {
             mockMvc.perform(get("/api/orders/1")
                             .with(user(userDetails)))
                     .andDo(print())
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.error.code").value("ORDER_003"));
+                    .andExpect(status().isForbidden())
+                    .andExpect(jsonPath("$.error.code").value("ORDER_ACCESS_DENIED"));
         }
     }
 
@@ -260,7 +260,7 @@ class OrderControllerTest {
             mockMvc.perform(post("/api/orders/1/cancel")
                             .with(user(userDetails)))
                     .andDo(print())
-                    .andExpect(status().isCreated())
+                    .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true))
                     .andExpect(jsonPath("$.data.orderStatus").value("CANCELED"))
                     .andExpect(jsonPath("$.data.refundedAmount").value(6000))
@@ -279,7 +279,7 @@ class OrderControllerTest {
                             .with(user(userDetails)))
                     .andDo(print())
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.error.code").value("ORDER_002"));
+                    .andExpect(jsonPath("$.error.code").value("INVALID_ORDER_STATUS"));
         }
     }
 }

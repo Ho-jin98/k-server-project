@@ -6,6 +6,7 @@ import com.example.kserverproject.common.exception.MenuException;
 import com.example.kserverproject.common.exception.OrderException;
 import com.example.kserverproject.common.exception.PointException;
 import com.example.kserverproject.common.exception.UserException;
+import com.example.kserverproject.common.exception.enums.ErrorCode;
 import com.example.kserverproject.common.fixture.TestFixtures;
 import com.example.kserverproject.domain.menu.repository.MenuRepository;
 import com.example.kserverproject.domain.order.dto.event.OrderCreatedEvent;
@@ -16,13 +17,13 @@ import com.example.kserverproject.domain.order.dto.response.OrderDetailResponseD
 import com.example.kserverproject.domain.order.dto.response.OrderListResponseDto;
 import com.example.kserverproject.domain.order.entity.Order;
 import com.example.kserverproject.domain.order.enums.OrderStatus;
-import com.example.kserverproject.domain.order.producer.OrderProducer;
 import com.example.kserverproject.domain.order.repository.OrderRepository;
 import com.example.kserverproject.domain.order.util.OrderItemFactory;
 import com.example.kserverproject.domain.pointHistory.enums.PointType;
 import com.example.kserverproject.domain.pointHistory.service.PointHistoryService;
 import com.example.kserverproject.domain.user.entity.User;
 import com.example.kserverproject.domain.user.repository.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -75,6 +76,12 @@ class OrderServiceTest {
     @Mock
     private ApplicationEventPublisher eventPublisher;
 
+    @BeforeEach
+    void setUp() {
+        // 자기 참조 필드 설정 (Spring Proxy 모사)
+        ReflectionTestUtils.setField(orderService, "self", orderService);
+    }
+
     // RedisLockService의 executeWithLock이 실제 supplier를 실행하도록 설정
     @SuppressWarnings("unchecked")
     private void mockRedisLock() {
@@ -116,6 +123,9 @@ class OrderServiceTest {
             assertThat(response.orderStatus()).isEqualTo(OrderStatus.CREATED);
             assertThat(response.totalAmount()).isEqualTo(6000L);
             assertThat(customer.getPointBalance()).isEqualTo(994_000L); // 1_000_000 - 6_000
+            
+            // 검증: 포인트 내역이 트랜잭션 내에서 즉시 기록되었는지 확인
+            verify(pointHistoryService).record(customer, 6000L, PointType.PAYMENT);
             verify(eventPublisher).publishEvent(any(OrderCreatedEvent.class));
         }
 

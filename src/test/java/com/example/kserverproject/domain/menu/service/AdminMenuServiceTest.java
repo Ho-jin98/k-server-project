@@ -40,6 +40,9 @@ class AdminMenuServiceTest {
     @Mock
     private MenuRepository menuRepository;
 
+    @Mock
+    private MenuRedisService menuRedisService;
+
     @Nested
     @DisplayName("메뉴 생성")
     class CreateMenu {
@@ -58,6 +61,7 @@ class AdminMenuServiceTest {
 
             assertThat(response.menuName()).isEqualTo("바닐라라떼");
             assertThat(response.price()).isEqualTo(4500L);
+            verify(menuRedisService).evictMenusAll();
         }
 
         @Test
@@ -105,6 +109,8 @@ class AdminMenuServiceTest {
 
             assertThat(response.menuName()).isEqualTo("수정된아메리카노");
             assertThat(response.price()).isEqualTo(3500L);
+            verify(menuRedisService).evictMenusAll();
+            verify(menuRedisService).evictMenu(1L);
         }
 
         @Test
@@ -149,6 +155,8 @@ class AdminMenuServiceTest {
             adminMenuService.deleteMenu(1L, 1L);
 
             verify(menuRepository).delete(any(Menu.class));
+            verify(menuRedisService).evictMenusAll();
+            verify(menuRedisService).evictMenu(1L);
         }
 
         @Test

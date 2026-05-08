@@ -23,9 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class OrderKafkaService {
 
     private final OrderRepository orderRepository;
-    private final UserRepository userRepository;
     private final MenuRedisService menuRedisService;
-    private final PointHistoryService pointHistoryService;
 
     // DB 작업만 트랜잭션 안에서
     public void processOrderCompleted(OrderEventDto orderEventDto) {
@@ -41,12 +39,6 @@ public class OrderKafkaService {
         }
 
         findOrder.completeOrder();
-
-        // 포인트 결제 기록
-        User findUser = userRepository.findById(orderEventDto.userId())
-                .orElseThrow( () -> new OrderException(ErrorCode.USER_NOT_FOUND));
-
-        pointHistoryService.record(findUser, orderEventDto.totalPrice(), PointType.PAYMENT);
     }
 
     // Redis는 트랜잭션 밖으로 분리

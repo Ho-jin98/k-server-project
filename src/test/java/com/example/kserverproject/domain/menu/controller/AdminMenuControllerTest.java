@@ -7,7 +7,6 @@ import com.example.kserverproject.common.exception.UnauthorizedException;
 import com.example.kserverproject.common.exception.enums.ErrorCode;
 import com.example.kserverproject.common.fixture.TestFixtures;
 import com.example.kserverproject.common.jwt.CustomUserDetails;
-import com.example.kserverproject.domain.auth.controller.AuthController;
 import com.example.kserverproject.domain.menu.dto.request.CreateMenuRequestDto;
 import com.example.kserverproject.domain.menu.dto.request.UpdateMenuRequestDto;
 import com.example.kserverproject.domain.menu.dto.response.CreateMenuResponseDto;
@@ -120,8 +119,8 @@ class AdminMenuControllerTest {
         }
 
         @Test
-        @DisplayName("CUSTOMER 권한으로 메뉴 등록 시 400을 반환한다")
-        void createMenu_notAdmin_returns400() throws Exception {
+        @DisplayName("CUSTOMER 권한으로 메뉴 등록 시 403을 반환한다")
+        void createMenu_notAdmin_returns403() throws Exception {
             CreateMenuRequestDto request = new CreateMenuRequestDto(
                     "바닐라라떼", 4500L, "https://example.com/images/vanilla-latte.jpg"
             );
@@ -136,13 +135,13 @@ class AdminMenuControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andDo(print())
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.error.code").value("ADMIN_001"));
+                    .andExpect(status().isForbidden())
+                    .andExpect(jsonPath("$.error.code").value("UNAUTHORIZED_ADMIN_ACCESS"));
         }
     }
 
     @Nested
-    @DisplayName("PUT /api/admin/menus/{menuId} - 메뉴 수정")
+    @DisplayName("PATCH /api/admin/menus/{menuId} - 메뉴 수정")
     class UpdateMenu {
 
         @Test
@@ -159,7 +158,7 @@ class AdminMenuControllerTest {
 
             CustomUserDetails adminDetails = new CustomUserDetails(TestFixtures.createAdmin());
 
-            mockMvc.perform(put("/api/admin/menus/1")
+            mockMvc.perform(patch("/api/admin/menus/1")
                             .with(user(adminDetails))
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
@@ -170,8 +169,8 @@ class AdminMenuControllerTest {
         }
 
         @Test
-        @DisplayName("존재하지 않는 메뉴 수정 시 400을 반환한다")
-        void updateMenu_notFound_returns400() throws Exception {
+        @DisplayName("존재하지 않는 메뉴 수정 시 404를 반환한다")
+        void updateMenu_notFound_returns404() throws Exception {
             UpdateMenuRequestDto request = new UpdateMenuRequestDto(
                     "수정된라떼", 5000L, "https://example.com/images/new.jpg"
             );
@@ -181,13 +180,13 @@ class AdminMenuControllerTest {
 
             CustomUserDetails adminDetails = new CustomUserDetails(TestFixtures.createAdmin());
 
-            mockMvc.perform(put("/api/admin/menus/999")
+            mockMvc.perform(patch("/api/admin/menus/999")
                             .with(user(adminDetails))
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andDo(print())
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.error.code").value("MENU_002"));
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.error.code").value("MENU_NOT_FOUND"));
         }
     }
 
@@ -208,8 +207,8 @@ class AdminMenuControllerTest {
         }
 
         @Test
-        @DisplayName("존재하지 않는 메뉴 삭제 시 400을 반환한다")
-        void deleteMenu_notFound_returns400() throws Exception {
+        @DisplayName("존재하지 않는 메뉴 삭제 시 404를 반환한다")
+        void deleteMenu_notFound_returns404() throws Exception {
             doThrow(new MenuException(ErrorCode.MENU_NOT_FOUND))
                     .when(adminMenuService).deleteMenu(any(), eq(999L));
 
@@ -218,8 +217,8 @@ class AdminMenuControllerTest {
             mockMvc.perform(delete("/api/admin/menus/999")
                             .with(user(adminDetails)))
                     .andDo(print())
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.error.code").value("MENU_002"));
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.error.code").value("MENU_NOT_FOUND"));
         }
     }
 }
