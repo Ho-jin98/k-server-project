@@ -19,6 +19,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -48,10 +49,10 @@ class AuthServiceTest {
     private JwtUtil jwtUtil;
 
     @Mock
-    private RedisTemplate<Object, Object> redisTemplate;
+    private StringRedisTemplate stringRedisTemplate;
 
     @Mock
-    private ValueOperations<Object, Object> valueOperations;
+    private ValueOperations<String, String> valueOperations;
 
     @Nested
     @DisplayName("회원가입")
@@ -149,7 +150,7 @@ class AuthServiceTest {
         void logout_success() {
             given(jwtUtil.validateToken("valid.token")).willReturn(true);
             given(jwtUtil.getRemainingTime("valid.token")).willReturn(3_600_000L);
-            given(redisTemplate.opsForValue()).willReturn(valueOperations);
+            given(stringRedisTemplate.opsForValue()).willReturn(valueOperations);
 
             authService.logout("valid.token");
 

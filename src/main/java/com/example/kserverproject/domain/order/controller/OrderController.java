@@ -8,6 +8,7 @@ import com.example.kserverproject.domain.order.dto.response.CreateOrderResponseD
 import com.example.kserverproject.domain.order.dto.response.OrderCancelResponseDto;
 import com.example.kserverproject.domain.order.dto.response.OrderDetailResponseDto;
 import com.example.kserverproject.domain.order.dto.response.OrderListResponseDto;
+import com.example.kserverproject.domain.order.facade.OrderFacade;
 import com.example.kserverproject.domain.order.service.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 public class OrderController {
 
     private final OrderService orderService;
+    private final OrderFacade orderFacade;
 
     @PostMapping
     public ResponseEntity<ApiResponse<CreateOrderResponseDto>> createOrder(
@@ -32,7 +34,7 @@ public class OrderController {
             @Valid @RequestBody CreateOrderRequestDto requestDto) {
 
         Long userId = customUserDetails.getUser().getId();
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.of(orderService.createOrder(userId, requestDto)));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.of(orderFacade.createOrder(userId, requestDto)));
     }
 
     // 내 주문 상세 조회

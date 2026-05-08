@@ -32,6 +32,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,29 +49,12 @@ public class OrderService {
     private final OrderItemFactory orderItemFactory;
     private final ApplicationEventPublisher eventPublisher;
 
-    private OrderService self;
 
-    /**
-     * Spring 프록시를 통해 내부 트랜잭션을 호출하기 위한 자기 참조 주입
-     */
-    @Lazy
-    @Autowired
-    public void setSelf(OrderService self) {
-        this.self = self;
-    }
 
-    // 락 획득 후 내부 트랜잭션 메서드(createOrderInternal)를 호출
-    public CreateOrderResponseDto createOrder(Long userId, CreateOrderRequestDto requestDto) {
-        return redisLockService.executeWithLock("lock:order:" + userId, () ->
-                self.createOrderInternal(userId, requestDto)
-        );
-    }
+    // 실제 주문 처리 - 내부 트랜잭션 메서드
 
-    /**
-     * 실제 주문 처리 - 내부 트랜잭션 메서드
-     */
     @Transactional
-    public CreateOrderResponseDto createOrderInternal(Long userId, CreateOrderRequestDto requestDto) {
+    public CreateOrderResponseDto createOrder(Long userId, CreateOrderRequestDto requestDto) {
 
         // 유저 조회
         User user = userRepository.findByUserIdWithLock(userId)

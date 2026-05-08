@@ -15,6 +15,7 @@ import com.example.kserverproject.domain.order.dto.response.OrderCancelResponseD
 import com.example.kserverproject.domain.order.dto.response.OrderDetailResponseDto;
 import com.example.kserverproject.domain.order.dto.response.OrderListResponseDto;
 import com.example.kserverproject.domain.order.enums.OrderStatus;
+import com.example.kserverproject.domain.order.facade.OrderFacade;
 import com.example.kserverproject.domain.order.service.OrderService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
@@ -62,6 +63,9 @@ class OrderControllerTest {
     @MockitoBean
     private OrderService orderService;
 
+    @MockitoBean
+    private OrderFacade orderFacade;
+
     @Nested
     @DisplayName("POST /api/orders - 주문 생성")
     class CreateOrder {
@@ -79,7 +83,7 @@ class OrderControllerTest {
                     6000L, OrderStatus.CREATED, LocalDateTime.now()
             );
 
-            given(orderService.createOrder(eq(2L), any())).willReturn(response);
+            given(orderFacade.createOrder(eq(2L), any())).willReturn(response);
 
             CustomUserDetails userDetails = new CustomUserDetails(TestFixtures.createCustomer1());
 
@@ -117,7 +121,7 @@ class OrderControllerTest {
                     List.of(new CreateOrderRequestDto.OrderItemRequestDto(1L, 1))
             );
 
-            given(orderService.createOrder(eq(99L), any()))
+            given(orderFacade.createOrder(eq(99L), any()))
                     .willThrow(new PointException(ErrorCode.INSUFFICIENT_POINTS_BALANCE));
 
             CustomUserDetails userDetails = new CustomUserDetails(TestFixtures.createCustomerWithNoPoint());
@@ -138,7 +142,7 @@ class OrderControllerTest {
                     List.of(new CreateOrderRequestDto.OrderItemRequestDto(999L, 1))
             );
 
-            given(orderService.createOrder(eq(2L), any()))
+            given(orderFacade.createOrder(eq(2L), any()))
                     .willThrow(new MenuException(ErrorCode.MENU_NOT_FOUND));
 
             CustomUserDetails userDetails = new CustomUserDetails(TestFixtures.createCustomer1());

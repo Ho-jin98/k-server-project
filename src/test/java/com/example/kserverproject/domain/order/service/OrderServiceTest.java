@@ -68,29 +68,11 @@ class OrderServiceTest {
     private PointHistoryService pointHistoryService;
 
     @Mock
-    private RedisLockService redisLockService;
-
-    @Mock
     private OrderItemFactory orderItemFactory;
 
     @Mock
     private ApplicationEventPublisher eventPublisher;
 
-    @BeforeEach
-    void setUp() {
-        // 자기 참조 필드 설정 (Spring Proxy 모사)
-        ReflectionTestUtils.setField(orderService, "self", orderService);
-    }
-
-    // RedisLockService의 executeWithLock이 실제 supplier를 실행하도록 설정
-    @SuppressWarnings("unchecked")
-    private void mockRedisLock() {
-        given(redisLockService.executeWithLock(anyString(), any(Supplier.class)))
-                .willAnswer(invocation -> {
-                    Supplier<CreateOrderResponseDto> supplier = invocation.getArgument(1);
-                    return supplier.get();
-                });
-    }
 
     @Nested
     @DisplayName("주문 생성")
@@ -99,7 +81,6 @@ class OrderServiceTest {
         @Test
         @DisplayName("정상 주문 생성 시 포인트가 차감되고 Kafka 이벤트가 발행된다")
         void createOrder_success() {
-            mockRedisLock();
 
             User customer = TestFixtures.createCustomer1(); // 1_000_000L
 
@@ -132,7 +113,6 @@ class OrderServiceTest {
         @Test
         @DisplayName("포인트 잔액이 부족하면 PointException이 발생한다")
         void createOrder_insufficientPoints_throwsPointException() {
-            mockRedisLock();
 
             User customerWithNoPoint = TestFixtures.createCustomerWithNoPoint(); // 0L
 
@@ -152,7 +132,6 @@ class OrderServiceTest {
         @Test
         @DisplayName("존재하지 않는 메뉴로 주문 시 MenuException이 발생한다")
         void createOrder_menuNotFound_throwsMenuException() {
-            mockRedisLock();
 
             given(userRepository.findByUserIdWithLock(2L)).willReturn(Optional.of(TestFixtures.createCustomer1()));
             given(menuRepository.findById(999L)).willReturn(Optional.empty());
@@ -168,7 +147,6 @@ class OrderServiceTest {
         @Test
         @DisplayName("존재하지 않는 유저로 주문 시 UserException이 발생한다")
         void createOrder_userNotFound_throwsUserException() {
-            mockRedisLock();
 
             given(userRepository.findByUserIdWithLock(999L)).willReturn(Optional.empty());
 

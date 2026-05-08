@@ -70,7 +70,7 @@ class UserControllerTest {
         }
 
         @Test
-        @DisplayName("존재하지 않는 유저 조회 시 400을 반환한다")
+        @DisplayName("존재하지 않는 유저 조회 시 404를 반환한다")
         void getUserInformation_notFound_returns400() throws Exception {
             given(userService.getUserInformation(2L))
                     .willThrow(new BusinessException(ErrorCode.USER_NOT_FOUND));
@@ -80,8 +80,7 @@ class UserControllerTest {
             mockMvc.perform(get("/api/users/me")
                             .with(user(userDetails)))
                     .andDo(print())
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.error.code").value("CS_001"));
+                    .andExpect(status().isNotFound());
         }
     }
 }

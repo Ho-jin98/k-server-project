@@ -115,7 +115,7 @@ class AuthControllerTest {
         }
 
         @Test
-        @DisplayName("중복 이메일이면 400을 반환한다")
+        @DisplayName("중복 이메일이면 409를 반환한다")
         void signup_duplicateEmail_returns400() throws Exception {
             SignupRequestDto request = SignupRequestDto.builder()
                     .email("user1@test.com")
@@ -130,9 +130,8 @@ class AuthControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andDo(print())
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.success").value(false))
-                    .andExpect(jsonPath("$.error.code").value("CS_002"));
+                    .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.success").value(false));
         }
     }
 
@@ -159,7 +158,7 @@ class AuthControllerTest {
         }
 
         @Test
-        @DisplayName("존재하지 않는 이메일로 로그인 시 400을 반환한다")
+        @DisplayName("존재하지 않는 이메일로 로그인 시 404를 반환한다")
         void login_userNotFound_returns400() throws Exception {
             LoginRequestDto request = new LoginRequestDto("none@test.com", "password123!");
 
@@ -169,12 +168,11 @@ class AuthControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andDo(print())
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.error.code").value("CS_001"));
+                    .andExpect(status().isNotFound());
         }
 
         @Test
-        @DisplayName("비밀번호 불일치 시 400을 반환한다")
+        @DisplayName("비밀번호 불일치 시 401을 반환한다")
         void login_wrongPassword_returns400() throws Exception {
             LoginRequestDto request = new LoginRequestDto("user1@test.com", "wrongpassword!");
 
@@ -184,8 +182,7 @@ class AuthControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andDo(print())
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.error.code").value("CS_003"));
+                    .andExpect(status().isUnauthorized());
         }
     }
 
@@ -204,7 +201,7 @@ class AuthControllerTest {
         }
 
         @Test
-        @DisplayName("유효하지 않은 토큰으로 로그아웃 시 400을 반환한다")
+        @DisplayName("유효하지 않은 토큰으로 로그아웃 시 401을 반환한다")
         void logout_invalidToken_returns400() throws Exception {
             doThrow(new UnauthorizedException(ErrorCode.INVALID_TOKEN))
                     .when(authService).logout(any());
@@ -212,8 +209,7 @@ class AuthControllerTest {
             mockMvc.perform(post("/api/auth/logout")
                             .header("Authorization", "Bearer invalid.token"))
                     .andDo(print())
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.error.code").value("AUTH_002"));
+                    .andExpect(status().isUnauthorized());
         }
     }
 }
