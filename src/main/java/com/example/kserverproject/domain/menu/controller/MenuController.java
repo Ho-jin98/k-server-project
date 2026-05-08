@@ -2,6 +2,7 @@ package com.example.kserverproject.domain.menu.controller;
 
 import com.example.kserverproject.common.dto.response.ApiResponse;
 import com.example.kserverproject.common.dto.response.PageResponseDto;
+import com.example.kserverproject.common.jwt.CustomUserDetails;
 import com.example.kserverproject.domain.menu.dto.request.MenuSearchRequestDto;
 import com.example.kserverproject.domain.menu.dto.response.MenuDetailResponseDto;
 import com.example.kserverproject.domain.menu.dto.response.MenuListResponseDto;
@@ -14,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -43,10 +45,12 @@ public class MenuController {
     // 메뉴 검색
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<PageResponseDto<MenuSearchResponseDto>>> searchMenus(
-            @ModelAttribute MenuSearchRequestDto requestDto) {
+            @ModelAttribute MenuSearchRequestDto requestDto,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
+        Long userId = customUserDetails != null ? customUserDetails.getUser().getId() :  null;
         Pageable pageable = PageRequest.of(requestDto.page() - 1, requestDto.size());
-        return ResponseEntity.ok(ApiResponse.of(menuService.searchMenus(requestDto, pageable)));
+        return ResponseEntity.ok(ApiResponse.of(menuService.searchMenus(requestDto, pageable, userId)));
     }
 
     // 인기 메뉴 조회

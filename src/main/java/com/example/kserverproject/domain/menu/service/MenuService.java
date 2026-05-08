@@ -24,30 +24,44 @@ import java.util.List;
 public class MenuService {
 
     private final MenuRepository menuRepository;
+    private final MenuRedisService menuRedisService;
 
-    @Cacheable(value = "menus", cacheManager = "cacheManager")
     public List<MenuListResponseDto> getMenus() {
+        List<MenuListResponseDto> cached = menuRedisService.getMenusCache();
+        if (cached != null) return cached;
 
-        return menuRepository.findAll().stream()
+        List<MenuListResponseDto> menus = menuRepository.findAll().stream()
                 .map(MenuListResponseDto::from)
                 .toList();
+
+        menuRedisService.setMenusCache(menus);
+        return menus;
     }
 
     // 메뉴 상세 조회
-    @Cacheable(value = "menus", key = "#menuId", cacheManager = "cacheManager")
     public MenuDetailResponseDto getMenu(Long menuId) {
+        MenuDetailResponseDto cached = menuRedisService.getMenuCache(menuId);
+        if (cached != null) return cached;
 
         Menu findMenu = menuRepository.findById(menuId)
                 .orElseThrow(() -> new MenuException(ErrorCode.MENU_NOT_FOUND));
 
-        return MenuDetailResponseDto.from(findMenu);
+        MenuDetailResponseDto responseDto = MenuDetailResponseDto.from(findMenu);
+        menuRedisService.setMenuCache(menuId, responseDto);
+
+        return responseDto;
     }
 
     // 메뉴 검색
-    public PageResponseDto<MenuSearchResponseDto> searchMenus(MenuSearchRequestDto requestDto, Pageable pageable) {
+    public PageResponseDto<MenuSearchResponseDto> searchMenus(MenuSearchRequestDto requestDto, Pageable pageable, Long userId) {
 
         Page<MenuSearchResponseDto> result = menuRepository.searchMenus(requestDto, pageable)
                 .map(MenuSearchResponseDto::from);
+
+        if (userId != null) {
+            result.getContent().forEach(menu ->
+                    menuRedisService.incrementMenuScoreBySearch(menu.menuId(), userId.toString()));
+        }
 
         return PageResponseDto.of(result);
     }

@@ -12,6 +12,7 @@ import com.example.kserverproject.domain.user.entity.User;
 import com.example.kserverproject.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +27,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final StringRedisTemplate stringRedisTemplate;
 
     public SignupResponseDto signup(SignupRequestDto requestDto) {
 
@@ -76,7 +77,7 @@ public class AuthService {
 
         // 남은 만료시간이 있을 때만 블랙리스트에 저장
         if (remainingTime > 0) {
-            redisTemplate.opsForValue()
+            stringRedisTemplate.opsForValue()
                     .set("blacklist:" + token, "logout", remainingTime, TimeUnit.MILLISECONDS);
         }
     }

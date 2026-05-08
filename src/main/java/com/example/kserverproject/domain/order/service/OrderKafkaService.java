@@ -55,7 +55,7 @@ public class OrderKafkaService {
         String userId = orderEventDto.userId().toString();
 
         for (OrderEventDto.OrderItemEventDto item : orderEventDto.items()) {
-            menuRedisService.incrementMenuScore(item.menuId(), userId);
+            menuRedisService.incrementMenuScoreByOrderCreate(item.menuId(), userId);
         }
     }
 }

@@ -14,7 +14,7 @@ public enum ErrorCode {
     INVALID_LOGIN_CREDENTIALS(HttpStatus.UNAUTHORIZED, "로그인 정보가 일치하지 않습니다."),
 
     // Point
-    INSUFFICIENT_POINTS_BALANCE(HttpStatus.BAD_REQUEST, "포인트 잔액이 부족합니다."),
+    INSUFFICIENT_POINTS_BALANCE(HttpStatus.CONFLICT, "포인트 잔액이 부족합니다."),
     INVALID_CHARGE_AMOUNT(HttpStatus.BAD_REQUEST, "충전 금액은 0보다 커야합니다."),
     INVALID_REFUND_AMOUNT(HttpStatus.BAD_REQUEST, "환불 금액은 0보다 커야합니다."),
 

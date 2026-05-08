@@ -23,6 +23,7 @@ public class AdminMenuService {
 
     private final UserRepository userRepository;
     private final MenuRepository menuRepository;
+    private final MenuRedisService menuRedisService;
 
     // 메뉴 생성
     @Transactional
@@ -46,6 +47,7 @@ public class AdminMenuService {
                 .build();
 
         menuRepository.save(createMenu);
+        menuRedisService.evictMenusAll();
 
         return CreateMenuResponseDto.from(createMenu);
     }
@@ -70,6 +72,8 @@ public class AdminMenuService {
         }
 
         findMenu.updateMenu(requestDto.menuName(), requestDto.price(), requestDto.imageUrl());
+        menuRedisService.evictMenusAll();
+        menuRedisService.evictMenu(menuId);
 
         return UpdateMenuResponseDto.from(findMenu);
     }
@@ -89,5 +93,7 @@ public class AdminMenuService {
                 .orElseThrow(() -> new MenuException(ErrorCode.MENU_NOT_FOUND));
 
         menuRepository.delete(findMenu);
+        menuRedisService.evictMenusAll();
+        menuRedisService.evictMenu(menuId);
     }
 }

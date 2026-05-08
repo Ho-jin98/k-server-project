@@ -1,14 +1,22 @@
 package com.example.kserverproject.domain.menu.dto.response;
 
 import com.example.kserverproject.domain.menu.entity.Menu;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-public record MenuDetailResponseDto (
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+public class MenuDetailResponseDto {
 
-        Long menuId,
-        String menuName,
-        Long price,
-        String imageUrl
-) {
+    private Long menuId;
+    private String menuName;
+    private Long price;
+    private String imageUrl;
+
     public static MenuDetailResponseDto from(Menu menu) {
         return new MenuDetailResponseDto(
                 menu.getId(),
