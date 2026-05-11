@@ -539,6 +539,8 @@ public class Menu extends BaseEntity { ... }
 
 ### 03 — Redis 캐싱: 200명 동시 메뉴 조회
 
+**GET /api/menus — Redis 캐시 적중률 검증**
+
 | 메트릭 | 기대값 | 실제값 | 결과 |
 |--------|--------|--------|------|
 | Cold Start 응답시간 | 기록 | 13ms | ✅ |
