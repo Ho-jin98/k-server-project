@@ -794,6 +794,6 @@ k6 run -e BASE_URL=http://localhost:8080 src/test/java/com/example/kserverprojec
 
 <div align="center">
 
-<img src="docs/images/마무리.png" width="49%"/>
+<img src="docs/images/마무리.png" width="60%"/>
 
 </div>
