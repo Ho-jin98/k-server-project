@@ -3,6 +3,7 @@ package com.example.kserverproject.common.config.security;
 import com.example.kserverproject.common.jwt.CustomUserDetailsService;
 import com.example.kserverproject.common.jwt.JwtFilter;
 import com.example.kserverproject.common.jwt.JwtUtil;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,6 +33,14 @@ public class SecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
+                .exceptionHandling(ex -> ex
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.getWriter().write(
+                                    "{\"success\":false,\"error\":{\"code\":\"FORBIDDEN_ACCESS\",\"message\":\"접근 권한이 없습니다.\"}}"
+                            );
+                        }))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/signup", "/api/auth/login" ).permitAll()
                         .requestMatchers("/api/menus/**").permitAll()

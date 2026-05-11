@@ -14,7 +14,7 @@ public class KafkaTopic {
     public NewTopic orderTopic() {
         return TopicBuilder.name(TOPIC_ORDER)
                 .partitions(3)
-                .replicas(3)
+                .replicas(1)
                 .build();
     }
 }

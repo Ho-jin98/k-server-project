@@ -22,6 +22,7 @@ import com.example.kserverproject.domain.order.util.OrderItemFactory;
 import com.example.kserverproject.domain.pointHistory.enums.PointType;
 import com.example.kserverproject.domain.pointHistory.service.PointHistoryService;
 import com.example.kserverproject.domain.user.entity.User;
+import com.example.kserverproject.domain.user.enums.UserRole;
 import com.example.kserverproject.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +46,6 @@ public class OrderService {
     private final UserRepository userRepository;
     private final MenuRepository menuRepository;
     private final PointHistoryService pointHistoryService;
-    private final RedisLockService redisLockService;
     private final OrderItemFactory orderItemFactory;
     private final ApplicationEventPublisher eventPublisher;
 
@@ -59,6 +59,10 @@ public class OrderService {
         // 유저 조회
         User user = userRepository.findByUserIdWithLock(userId)
                 .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
+
+        if (user.getRole() == UserRole.ADMIN) {
+            throw new OrderException(ErrorCode.ORDER_FORBIDDEN_ACCESS);
+        }
 
         // 메뉴 리스트 조회
         List<Menu> menus = new ArrayList<>();

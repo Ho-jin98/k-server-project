@@ -18,20 +18,6 @@ public class RedisConfig {
     @Value("${spring.data.redis.port}")
     private int redisPort;
 
-//    private GenericJackson2JsonRedisSerializer jsonSerializer() {
-//        ObjectMapper objectMapper = new ObjectMapper()
-//                .registerModule(new JavaTimeModule())
-//                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-//
-//        objectMapper.activateDefaultTyping(
-//                LaissezFaireSubTypeValidator.instance,
-//                ObjectMapper.DefaultTyping.NON_FINAL,
-//                JsonTypeInfo.As.PROPERTY
-//        );
-//
-//        return new GenericJackson2JsonRedisSerializer(objectMapper);
-//    }
-
     // Redisson 클라이언트
     @Bean
     public RedissonClient redissonClient() {
@@ -41,43 +27,4 @@ public class RedisConfig {
         return Redisson.create(config);
     }
 
-//    // RedisTemplate (Sorted Set)
-//    @Bean
-//    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
-//
-//        RedisTemplate<String, Object> template = new RedisTemplate<>();
-//
-//        template.setConnectionFactory(redisConnectionFactory);
-//
-//        GenericJackson2JsonRedisSerializer serializer = jsonSerializer();
-//        template.setKeySerializer(new StringRedisSerializer());
-//        template.setValueSerializer(serializer);
-//        template.setHashKeySerializer(new StringRedisSerializer());
-//        template.setHashValueSerializer(serializer);
-//
-//        return template;
-//    }
-
-    // CacheManager(@Cacheable용)
-//    @Bean
-//    public CacheManager cacheManager(RedisConnectionFactory redisConnectionFactory) {
-//
-//        GenericJackson2JsonRedisSerializer serializer = jsonSerializer();
-//
-//        RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
-//                .entryTtl(Duration.ofMinutes(30))
-//                .serializeKeysWith(
-//                        RedisSerializationContext.SerializationPair
-//                                .fromSerializer(new StringRedisSerializer())
-//                )
-//                .serializeValuesWith(
-//                        RedisSerializationContext.SerializationPair
-//                                .fromSerializer(serializer)
-//                )
-//                .disableCachingNullValues();
-//
-//        return RedisCacheManager.builder(redisConnectionFactory)
-//                .cacheDefaults(config)
-//                .build();
-//    }
 }

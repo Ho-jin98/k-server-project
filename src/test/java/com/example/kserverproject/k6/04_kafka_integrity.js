@@ -178,9 +178,9 @@ export function teardown(data) {
                 console.error(`     → redis-cli TTL "popular:menus:result"`);
                 console.error(`     → redis-cli ZSCORE "popular:menus:$(date +%Y-%m-%d)" ${menuId}`);
                 console.error('   ▶ 원인 2: DLT로 빠진 메시지');
-                console.error('     → kafka-console-consumer --topic order-event.DLT');
+                console.error('     → kafka-console-consumer --topic order.DLT');
                 console.error('   ▶ 원인 3: Consumer Lag');
-                console.error('     → kafka-consumer-groups --describe --group order-consumer-group');
+                console.error('     → kafka-consumer-groups --describe --group order-group');
             } else {
                 console.error(`🚨 [FAIL] ${diff - TOTAL_ORDERS}건 중복 처리 → Consumer 멱등성 확인`);
             }

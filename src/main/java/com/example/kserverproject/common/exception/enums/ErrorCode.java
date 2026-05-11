@@ -28,6 +28,7 @@ public enum ErrorCode {
     INVALID_ORDER_STATUS(HttpStatus.BAD_REQUEST, "유효하지 않은 주문 상태입니다."),
     ORDER_ACCESS_DENIED(HttpStatus.FORBIDDEN, "해당 주문에 대한 권한이 없습니다."),
     DUPLICATE_MENU_IN_ORDER(HttpStatus.CONFLICT, "주문에 중복된 메뉴가 포함되어 있습니다."),
+    ORDER_FORBIDDEN_ACCESS(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
 
     // Admin
     UNAUTHORIZED_ADMIN_ACCESS(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),

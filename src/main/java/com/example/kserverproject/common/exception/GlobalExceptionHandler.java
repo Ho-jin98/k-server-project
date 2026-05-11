@@ -11,6 +11,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.nio.file.AccessDeniedException;
 import java.util.Objects;
 
 @Slf4j
@@ -59,12 +60,18 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(ErrorCode.DATA_INTEGRITY_ERROR);
     }
 
-        // 최후의 보루
-        @ExceptionHandler(Exception.class)
-        public ResponseEntity<ErrorResponse> handleException (Exception e){
-            log.error("Exception: ", e);
-            return buildErrorResponse(ErrorCode.INTERNAL_SERVER_ERROR);
-        }
+    // 최후의 보루
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleException(Exception e) {
+        log.error("Exception: ", e);
+        return buildErrorResponse(ErrorCode.INTERNAL_SERVER_ERROR);
+    }
+
+//    @ExceptionHandler(AccessDeniedException.class)
+//    public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException e) {
+//        log.warn("AccessDeniedException: ", e);
+//        return buildErrorResponse(ErrorCode.ORDER_FORBIDDEN_ACCESS);
+//    }
 
     // 공통 빌더
     private ResponseEntity<ErrorResponse> buildErrorResponse(ErrorCode errorCode) {

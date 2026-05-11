@@ -7,10 +7,6 @@ import com.example.kserverproject.domain.order.dto.event.OrderEventDto;
 import com.example.kserverproject.domain.order.entity.Order;
 import com.example.kserverproject.domain.order.enums.OrderStatus;
 import com.example.kserverproject.domain.order.repository.OrderRepository;
-import com.example.kserverproject.domain.pointHistory.enums.PointType;
-import com.example.kserverproject.domain.pointHistory.service.PointHistoryService;
-import com.example.kserverproject.domain.user.entity.User;
-import com.example.kserverproject.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,13 +15,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-@Transactional
 public class OrderKafkaService {
 
     private final OrderRepository orderRepository;
     private final MenuRedisService menuRedisService;
 
     // DB 작업만 트랜잭션 안에서
+    @Transactional
     public void processOrderCompleted(OrderEventDto orderEventDto) {
 
         // Order 상태 CREATED -> COMPLETE로 변경
