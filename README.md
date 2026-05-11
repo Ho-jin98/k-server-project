@@ -145,15 +145,21 @@ OrderListener (Kafka Consumer)
 
 ## 🗂 ERD
 
-![ERD](docs/erd.png)
+<div align="center">
+
+**ERD**
+
+<img src="docs/images/ERD.png" width="49%"/>
+
+</div>
 
 | 테이블 | 설명 |
 |--------|------|
 | users | 유저 정보 (이메일, 비밀번호, 포인트 잔액, 역할) |
 | menus | 메뉴 정보 (이름, 가격, 이미지, 소프트 딜리트) |
 | orders | 주문 정보 (유저, 총액, 상태) |
-| order_items | 주문-메뉴 중간 테이블 (수량, 주문 당시 가격) |
-| point_histories | 포인트 거래 이력 (충전/결제/환불) |
+| order_items | 주문-메뉴 중간 테이블 (수량, 주문 당시 가격, order_id/menu_id 복합 유니크) |
+| point_histories | 포인트 거래 이력 (충전/결제/환불, amounts/balance_after) |
 
 <br>
 
