@@ -791,3 +791,9 @@ k6 run -e BASE_URL=http://localhost:8080 src/test/java/com/example/kserverprojec
 # 인기 메뉴 Sorted Set 테스트
 k6 run -e BASE_URL=http://localhost:8080 src/test/java/com/example/kserverproject/k6/05_popular_menu_sorted_set.js
 ```
+
+<div align="center">
+
+<img src="docs/images/마무리.png" width="49%"/>
+
+</div>
